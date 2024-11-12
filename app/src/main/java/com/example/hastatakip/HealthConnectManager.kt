@@ -2,8 +2,8 @@ package com.example.hastatakip
 
 
 import android.content.Context
+import android.os.RemoteException
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
@@ -14,6 +14,7 @@ import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+import kotlinx.coroutines.delay
 import java.time.Instant
 
 
@@ -37,6 +38,10 @@ class HealthConnectManager (private val context: Context) {
         HealthPermission.getWritePermission(StepsRecord::class),
     )
 
+
+
+
+
     suspend fun hasAllPermissions(permissions: Set<String>): Boolean {
         return healthConnectClient.permissionController.getGrantedPermissions().containsAll(permissions)
     }
@@ -48,9 +53,20 @@ class HealthConnectManager (private val context: Context) {
 
 
 
-    suspend fun readHeartRateData():String? {
+
+
+
+
+
+
+    suspend fun readHeartRateData(boxId: String?):String? {
         var data = "Değer Yok"
         // Kalp atış hızı verilerini zaman aralığı kısıtlaması olmadan çek
+
+        if (boxId != "5") {
+            return "--" // boxId "5" değilse veri yok
+        }
+
         val timeRange = TimeRangeFilter.between(Instant.EPOCH, Instant.now())
 
         val request = ReadRecordsRequest(
@@ -62,6 +78,7 @@ class HealthConnectManager (private val context: Context) {
 
         // Çekilen verilerden en sonuncusunu al
         val latestRecord = response.records.maxByOrNull { it.endTime }
+
 
         // Eğer veri varsa en son veriyi işleyin
         latestRecord?.let {
@@ -78,31 +95,33 @@ class HealthConnectManager (private val context: Context) {
 
 
 
-    suspend fun readBodyTemperatureData():String?{
+    suspend fun readBodyTemperatureData(boxId: String?):String?{
         var data = "Değer Yok"
-
+        if (boxId != "5") {
+            return "--"
+        }
         val timeRange = TimeRangeFilter.between(Instant.EPOCH, Instant.now())
 
         val request = ReadRecordsRequest(
             recordType = BodyTemperatureRecord::class,
             timeRangeFilter = timeRange
         )
-
         val response = healthConnectClient.readRecords(request)
-
         val latestRecord = response.records.maxByOrNull { it.time }
-
         latestRecord?.let {
-            val bodyTemp  = it.temperature.inCelsius
-
+            val bodyTemp  = it.temperature.inCelsius.toDouble()
             data= bodyTemp.toString()
         }
         return data
     }
 
 
-    suspend fun readHypotensionData():String?{
+    suspend fun readHypotensionData(boxId: String?):String?{
         var hypotensionData = "Değer Yok"
+
+        if (boxId != "5") {
+            return "--" // boxId "5" değilse veri yok
+        }
 
         val timeRange = TimeRangeFilter.between(Instant.EPOCH, Instant.now())
 
@@ -122,8 +141,12 @@ class HealthConnectManager (private val context: Context) {
     }
 
 
-    suspend fun readHypertensionData():String?{
+    suspend fun readHypertensionData(boxId: String?):String?{
         var hypertensionData = "Değer Yok"
+
+        if (boxId != "5") {
+            return "--" // boxId "5" değilse veri yok
+        }
 
         val timeRange = TimeRangeFilter.between(Instant.EPOCH, Instant.now())
 
@@ -142,8 +165,12 @@ class HealthConnectManager (private val context: Context) {
         return hypertensionData
     }
 
-    suspend fun readOxygenSaturation():String?{
-        var data = "Veri Yok"
+    suspend fun readOxygenSaturation(boxId: String?):String?{
+        var data = "Değer Yok"
+
+        if (boxId != "5") {
+            return "--" // boxId "5" değilse veri yok
+        }
 
         val timeRange = TimeRangeFilter.between(Instant.EPOCH, Instant.now())
 
@@ -156,7 +183,7 @@ class HealthConnectManager (private val context: Context) {
         val latestRecord = response.records.maxByOrNull { it.time }
 
         latestRecord?.let {
-            val saturation = it.percentage.toString()
+            val saturation = it.percentage.value.toString()
             data = saturation
         }
         return data

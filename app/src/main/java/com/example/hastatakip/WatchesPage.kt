@@ -2,24 +2,28 @@ package com.example.hastatakip
 
 import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -41,8 +45,8 @@ fun WatchesPage(navController: NavController) {
     LaunchedEffect(Unit) {
         boxes = loadBoxes(context).sortedBy { box->
             when(box.riskStatus){
-                "KRİTİK" -> 0
-                "RİSKLİ" -> 1
+                "ACİL" -> 0
+                "ORTA RİSKLİ" -> 1
                 "NORMAL" -> 2
                 else -> 3
             }
@@ -56,18 +60,18 @@ fun WatchesPage(navController: NavController) {
         // Geri tuşu işlevi ekleyin eğer gerekiyorsa
     }
 
+
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Grid to display boxes
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(3),
             modifier = Modifier
                 .weight(1f)
-                .padding(8.dp),
+                .fillMaxWidth(),
             contentPadding = PaddingValues(8.dp)
         ) {
             items(boxes.size) { index ->
@@ -75,32 +79,31 @@ fun WatchesPage(navController: NavController) {
                 val box = boxes[index]
 
                 val boxColor = when (box.riskStatus) {
-                    "KRİTİK" -> Color.Red.copy(0.65f)
-                    "RİSKLİ" -> Color.Yellow.copy(0.65f)
+                    "ACİL" -> Color.Red.copy(0.65f)
+                    "ORTA RİSKLİ" -> Color.Yellow.copy(0.65f)
                     "NORMAL" -> Color.Green.copy(0.65f)
                     else -> Color.Gray.copy(0.6f)
                 }
-                BoxItemView(
+
+                BoxWithImageAndContent(
                     item = box,
                     onLongPress = {
                         selectedBoxId = box.id
                         showDialog = true
                     },
                     onClick = {
-
                         if (box.riskStatus == "PASİF") {
                             navController.navigate("selection_page/${box.id}")
                         } else {
                             navController.navigate("patient_info_page/${box.id},${box.ageGroup},${box.gender},${box.riskStatus}")
                         }
-
-                        //val boxIdString = boxes[index].id.toString()
-                        //navController.navigate("selection_page/$boxIdString")
                     },
-                    boxColor = boxColor
+                    boxColor = boxColor,
+                    imageResId = R.drawable.watch
                 )
             }
         }
+
 
         // Add Button
         Button(
@@ -113,38 +116,101 @@ fun WatchesPage(navController: NavController) {
 
                 boxes = (boxes + BoxItem(newId)).sortedBy { box ->
                     when (box.riskStatus) {
-                        "KRİTİK" -> 0
-                        "RİSKLİ" -> 1
+                        "ACİL" -> 0
+                        "ORTA RİSKLİ" -> 1
                         "NORMAL" -> 2
                         else -> 3
                     }
                 }
 
-
-                //boxes = boxes + BoxItem(newId)
                 coroutineScope.launch {
                     saveBoxes(context, boxes)
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp),
+                .padding(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Blue.copy(0.65f))
         ) {
             Text("Saat Ekle", color = Color.White)
         }
+
+
+
     }
 
 
 }
 
+
 @Composable
-fun BoxItemView(item: BoxItem, onLongPress: () -> Unit, onClick: () -> Unit, boxColor: Color) {
+fun BoxWithImageAndContent(
+    item: BoxItem,
+    onLongPress: () -> Unit,
+    onClick: () -> Unit,
+    boxColor: Color,
+    imageResId: Int // Eklenen resim ID'si
+) {
+
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+    // Ekran boyutlarına göre dinamik boyutlandırma
+    val boxSize = screenWidth * 0.55f // Ekran genişliğinin %45'i kadar kutu boyutu
+    val boxHeight = screenHeight * 0.28f // Ekran yüksekliğinin %25'i kadar kutu yüksekliği
+    val imagePadding = screenWidth * 0.01f // Ekran genişliğinin %1'i kadar padding
+
+
     Box(
         modifier = Modifier
-            .size(120.dp) // Boyutu biraz artırdık
-            .padding(8.dp)
-            .background(boxColor, RoundedCornerShape(16.dp)) // Daha yumuşak köşeler
+            .size(boxSize,boxHeight)
+            .padding(imagePadding)
+            .clip(RoundedCornerShape(16.dp)) // Daha yumuşak köşeler
+            .background(Color.Transparent), // Arka planı şeffaf yapıyoruz
+        contentAlignment = Alignment.Center
+    ) {
+        // Resmi kutunun arka planı olarak yerleştirin
+        Image(
+            painter = painterResource(id = imageResId),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(16.dp))
+        )
+
+        // BoxItemView içeriğini üst üste yerleştirin
+        BoxItemView(
+            item = item,
+            onLongPress = onLongPress,
+            onClick = onClick,
+            boxColor = boxColor,
+            contentPadding = PaddingValues(
+                start = screenWidth * 0.035f,
+                end = screenWidth * 0.045f,
+                top = screenHeight * 0.006f,
+                bottom = screenHeight * 0.02f
+            )
+
+        )
+    }
+}
+
+
+
+
+@Composable
+fun BoxItemView(item: BoxItem, onLongPress: () -> Unit, onClick: () -> Unit, boxColor: Color, contentPadding: PaddingValues) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+
+
+    Box(
+        modifier = Modifier
+            .size(120.dp)
+            .padding(contentPadding)
+            .background(boxColor, RoundedCornerShape(18.dp))
             .pointerInput(Unit) {
                 detectTapGestures(
                     onLongPress = {
@@ -157,18 +223,22 @@ fun BoxItemView(item: BoxItem, onLongPress: () -> Unit, onClick: () -> Unit, box
             },
         contentAlignment = Alignment.Center
     ) {
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ){
             Text(
-                text = "Saat No: ${item.id}",
+                text = "NO: ${item.id}",
                 color = MaterialTheme.colorScheme.onSurface, // Daha uyumlu bir renk
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
             )
             Text(
                 text = item.riskStatus,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f), // Risk durumu için hafifçe farklı bir renk tonu
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+
             )
         }
 

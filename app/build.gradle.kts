@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -72,5 +73,18 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     // Use to implement health connects
     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
+    //splash screen
+    implementation("androidx.core:core-splashscreen:1.0.1")
+    //animation
+    implementation ("androidx.compose.animation:animation:1.6.8")
+    //firebase
+    implementation("com.google.firebase:firebase-database-ktx:21.0.0")
+    implementation("com.google.firebase:firebase-crashlytics-buildtools:3.0.2")
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation ("com.google.firebase:firebase-core:21.0.0")
+    implementation ("com.google.firebase:firebase-database:20.1.0")
 
 }

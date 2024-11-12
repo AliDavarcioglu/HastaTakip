@@ -159,14 +159,14 @@ fun SelectionPage(navController: NavController, boxIdsString: String?) {
                 Column {
                     Text(text = "RİSK DURUMU", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1976D2))
                     CheckboxWithLabel(
-                        label = "KRİTİK",
-                        checked = selectedRisk == "KRİTİK",
-                        onCheckedChange = { selectedRisk = "KRİTİK" }
+                        label = "ACİL",
+                        checked = selectedRisk == "ACİL",
+                        onCheckedChange = { selectedRisk = "ACİL" }
                     )
                     CheckboxWithLabel(
-                        label = "RİSKLİ",
-                        checked = selectedRisk == "RİSKLİ",
-                        onCheckedChange = { selectedRisk = "RİSKLİ" }
+                        label = "ORTA RİSKLİ",
+                        checked = selectedRisk == "ORTA RİSKLİ",
+                        onCheckedChange = { selectedRisk = "ORTA RİSKLİ" }
                     )
                     CheckboxWithLabel(
                         label = "NORMAL",

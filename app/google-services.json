@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "330786747470",
+    "firebase_url": "https://hasta-takip-673fa-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "hasta-takip-673fa",
+    "storage_bucket": "hasta-takip-673fa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:330786747470:android:fd29001598a169674ebf1f",
+        "android_client_info": {
+          "package_name": "com.example.hastatakip"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXk6L-K1ZoHErOq0AWQphyiSlVHyhtWhM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
